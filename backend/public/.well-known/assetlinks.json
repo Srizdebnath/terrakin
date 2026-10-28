@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "xyz.terrakin.terrakin",
+      "sha256_cert_fingerprints": [
+        "62:D7:F3:B3:2B:68:7C:3F:FA:6B:92:02:8C:B1:FE:0D:A2:EB:53:8A:57:45:09:3F:BB:32:23:54:EA:1C:D1:86"
+      ]
+    }
+  }
+]

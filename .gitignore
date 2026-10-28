@@ -1,0 +1,52 @@
+# Secrets: never commit
+.env
+.env.*
+**/.env
+**/.env.*
+*.jks
+*.keystore
+key.properties
+
+# Chat transcripts (contain pasted credentials)
+backend/2.txt
+/[0-9].txt
+app/android/*.txt
+
+# Old local backup
+lib-backup-*/
+
+# Flutter / Dart
+app/.dart_tool/
+app/build/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/.idea/
+app/*.iml
+app/android/.gradle/
+app/android/local.properties
+app/android/**/GeneratedPluginRegistrant.*
+app/android/app/.cxx/
+app/android/build/
+*.iml
+
+# Foundry: libs come from `forge install`, see contracts/README.md
+contracts/lib/
+contracts/out/
+contracts/cache/
+contracts/broadcast/*/31337/
+contracts/broadcast/**/dry-run/
+
+# Node / Vercel
+backend/node_modules/
+backend/.vercel/
+
+# Art build output (masters live in art/src)
+art/out/
+art/tools/__pycache__/
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/
+3.txt
+*.txt.export

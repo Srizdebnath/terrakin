@@ -1,0 +1,2 @@
+4992dcb3046ce4a55da7a3dff8e183ea256f2318cfdde8c28772535232c010bc  terrakin-1.0.0-arm64.apk
+ecbd880a715bd715941d62e80d1b60627eadf9b9b71a4cc191eb2b58c00ef763  terrakin-1.0.0-armv7.apk
