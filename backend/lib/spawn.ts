@@ -14,7 +14,7 @@ const TRAITS = 7;
 const CELL_DEG = 0.0015;
 const ZONE_DEG = 0.04;
 const WINDOW_MS = 15 * 60 * 1000;
-const DAY_MS = 24 * 60 * 60 * 1000;
+export const DAY_MS = 24 * 60 * 60 * 1000;
 
 export function hash32(a: number, b: number, c: number, salt: number): number {
   let h = Math.imul(salt >>> 0, 0x9e3779b1) >>> 0;
@@ -123,6 +123,12 @@ export function weatherSpawn(row: number, col: number, w: number, sky: Sky, boos
 export function zoneAt(lat: number, lng: number): { row: number; col: number } {
   const row = Math.floor(lat / ZONE_DEG);
   return { row, col: Math.floor(lng / lngStep(ZONE_DEG, row)) };
+}
+
+/** South-west and north-east corners of a Landmark zone, in degrees. */
+export function zoneBounds(row: number, col: number): { s: number; w: number; n: number; e: number } {
+  const step = lngStep(ZONE_DEG, row);
+  return { s: row * ZONE_DEG, w: col * step, n: (row + 1) * ZONE_DEG, e: (col + 1) * step };
 }
 
 /** Re-derives a Landmark: `L${row}:${col}:${day}`. */

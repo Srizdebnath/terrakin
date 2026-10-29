@@ -8,6 +8,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../app_state.dart';
+import '../chain/adventures.dart';
 import '../chain/social.dart';
 import '../core/copy.dart';
 import '../core/sound.dart';
@@ -24,6 +25,7 @@ import '../world/palette.dart';
 import '../world/sky_painter.dart';
 import '../world/world_data.dart';
 import '../world/world_painter.dart';
+import 'adventure_sheet.dart';
 import 'hex_sheet.dart';
 import 'lab_screen.dart';
 import 'raid_sheet.dart';
@@ -76,6 +78,8 @@ class _WorldScreenState extends State<WorldScreen>
     profile.addListener(_refresh);
     territory.addListener(_onTerritory);
     social.addListener(_onTerritory);
+    adventures.addListener(_onAdventures);
+    adventures.restoreLoop().catchError((Object _) {});
     territory.start(() => location.position);
     social
         .enrollOnce()
@@ -84,6 +88,7 @@ class _WorldScreenState extends State<WorldScreen>
     location.start();
     world.ensureAround(location.position);
     weather.start(location.position);
+    _refreshAdventures(location.position, force: true);
     _refresh();
     _timer = Timer.periodic(const Duration(seconds: 10), (_) => _refresh());
     _ticker.start();
@@ -114,6 +119,7 @@ class _WorldScreenState extends State<WorldScreen>
     profile.removeListener(_refresh);
     territory.removeListener(_onTerritory);
     social.removeListener(_onTerritory);
+    adventures.removeListener(_onAdventures);
     _timer?.cancel();
     _ticker.dispose();
     super.dispose();
@@ -125,6 +131,8 @@ class _WorldScreenState extends State<WorldScreen>
     world.ensureAround(p);
     weather.update(p);
     territory.moved(p);
+    adventures.walked(p);
+    _refreshAdventures(p);
     final last = _refreshedAt;
     if (last == null || const Distance().as(LengthUnit.Meter, last, p) > 12) {
       _refresh();
@@ -141,6 +149,36 @@ class _WorldScreenState extends State<WorldScreen>
     });
     _refresh();
     _frame.value++;
+  }
+
+  DateTime? _adventuresAt;
+
+  /// Drops and the Convergence schedule around the player, at most once a minute.
+  void _refreshAdventures(LatLng p, {bool force = false}) {
+    final at = _adventuresAt;
+    if (!force && at != null && DateTime.now().difference(at) < const Duration(minutes: 1)) return;
+    _adventuresAt = DateTime.now();
+    adventures.refreshDrops(p).catchError((Object _) {});
+    adventures.refreshConvergences(p).catchError((Object _) {});
+  }
+
+  void _onAdventures() {
+    _frame.value++;
+    if (mounted) setState(() {});
+  }
+
+  void _openAdventures() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: TK.dusk,
+      builder: (sheet) => AdventureSheet(
+        onStartLoop: () {
+          Navigator.pop(sheet);
+          adventures.startLoop(location.position);
+        },
+      ),
+    );
   }
 
   void _onTerritory() {
@@ -187,6 +225,20 @@ class _WorldScreenState extends State<WorldScreen>
           colour.withValues(alpha: mine || here ? 0.95 : 0.6),
           here ? 3 : (mine ? 2 : 1.5),
         ));
+      }
+    }
+    // The loop being walked, drawn on top; the start hex is the finish line.
+    if (adventures.looping) {
+      for (final id in adventures.trail.toSet()) {
+        final c = territory.corners(id);
+        final pts = Float32List(c.length * 2);
+        for (var i = 0; i < c.length; i++) {
+          final (x, y) = world.toLocal(c[i]);
+          pts[i * 2] = x;
+          pts[i * 2 + 1] = y;
+        }
+        final start = id == adventures.startHex;
+        out.add((pts, TK.loop.withValues(alpha: start ? 0.32 : 0.2), TK.loop, start ? 4 : 2.5));
       }
     }
     return out;
@@ -519,6 +571,51 @@ class _WorldScreenState extends State<WorldScreen>
       );
     }
 
+    final conv = adventures.nextConvergence;
+    if (conv != null && conv.announced) {
+      add(
+        const ValueKey('convBeam'),
+        conv.at,
+        0,
+        0,
+        220,
+        140,
+        600,
+        0.14,
+        const IgnorePointer(child: _Beam(colour: Color(0xFFE879F9))),
+      );
+      add(
+        ValueKey('conv${conv.id}'),
+        conv.at,
+        0,
+        0,
+        30,
+        64,
+        180,
+        1,
+        GestureDetector(
+          onTap: () => openConvergence(context, conv),
+          child: _ConvergenceBeacon(conv),
+        ),
+      );
+    }
+    for (final d in adventures.nearbyDrops) {
+      add(
+        ValueKey('drop${d.id}'),
+        d.area,
+        0,
+        0,
+        12,
+        40,
+        110,
+        1,
+        GestureDetector(
+          onTap: () => openDrop(context, d),
+          child: const _DropCrate(),
+        ),
+      );
+    }
+
     final b = buddy;
     if (b != null) {
       add(
@@ -738,6 +835,147 @@ class _WorldScreenState extends State<WorldScreen>
                 ),
               ),
             ),
+            const SizedBox(height: 8),
+            Align(alignment: Alignment.centerRight, child: _adventuresButton()),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _adventuresButton() {
+    final live = adventures.looping ||
+        adventures.nearbyDrops.isNotEmpty ||
+        (adventures.nextConvergence?.announced ?? false);
+    return GestureDetector(
+      onTap: _openAdventures,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: TK.dusk.withValues(alpha: 0.9),
+              shape: BoxShape.circle,
+              border: Border.all(color: TK.loop.withValues(alpha: 0.7)),
+            ),
+            child: const Icon(Icons.explore_rounded, color: TK.loop, size: 24),
+          ),
+          if (live)
+            Positioned(
+              right: 0,
+              top: 0,
+              child: Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: TK.danger,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: TK.dusk, width: 2),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  bool _closing = false;
+
+  Future<void> _closeLoop() async {
+    setState(() => _closing = true);
+    final m = ScaffoldMessenger.of(context);
+    try {
+      final (taken, _) = await adventures.closeLoop();
+      sound.play(Sfx.crown);
+      m.showSnackBar(SnackBar(
+        content: Text(taken == 0
+            ? 'Loop closed, but everything inside was already held or defended.'
+            : 'Loop closed: $taken ${taken == 1 ? 'hex is' : 'hexes are'} yours!'),
+      ));
+    } catch (e) {
+      m.showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      if (mounted) setState(() => _closing = false);
+    }
+  }
+
+  /// While walking a loop: progress, and the button to close it.
+  Widget _loopBanner() {
+    final n = adventures.distinctHexes;
+    final back = adventures.canClose;
+    final hint = adventures.loopError ??
+        (back
+            ? 'Back at the start. Close it!'
+            : n < 6
+                ? 'Walk ${6 - n} more ${6 - n == 1 ? 'hex' : 'hexes'}, then head back to the start'
+                : 'Head back to your starting hex to close the loop');
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: _chip(
+        Row(
+          children: [
+            const Icon(Icons.all_inclusive_rounded, color: TK.loop, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Loop · $n ${n == 1 ? 'hex' : 'hexes'}', style: TK.body(13, bold: true, color: TK.loop)),
+                  Text(
+                    hint,
+                    style: TK.body(11, color: adventures.loopError != null ? TK.danger : TK.mist),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            if (back)
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: TK.loop,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                ),
+                onPressed: _closing ? null : _closeLoop,
+                child: _closing
+                    ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: TK.ink))
+                    : const Text('Close loop'),
+              ),
+            IconButton(
+              tooltip: 'Abandon loop',
+              onPressed: _closing ? null : adventures.cancelLoop,
+              icon: const Icon(Icons.close_rounded, color: TK.mist),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// The hour before a Convergence and while it's open.
+  Widget _convergenceChip(Convergence c) {
+    final now = DateTime.now();
+    final when = c.open
+        ? 'OPEN · ${c.closesAt.difference(now).inMinutes + 1} min left'
+        : 'in ${c.opensAt.difference(now).inMinutes + 1} min';
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: _chip(
+        onTap: () => openConvergence(context, c),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.blur_circular_rounded, size: 18, color: Grade.mythic.color),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                'Convergence $when · ${c.name} · ${fmtDistance(location.distanceTo(c.at))}',
+                overflow: TextOverflow.ellipsis,
+                style: TK.body(12, bold: true, color: c.open ? TK.signal : TK.paper),
+              ),
+            ),
           ],
         ),
       ),
@@ -793,6 +1031,7 @@ class _WorldScreenState extends State<WorldScreen>
   Widget _bottomBar() {
     final lm = _landmarks.where((s) => !collection.isBonded(s.id)).firstOrNull;
     final me = location.position;
+    final conv = adventures.nextConvergence;
     return Positioned(
       left: 16,
       right: 16,
@@ -801,6 +1040,8 @@ class _WorldScreenState extends State<WorldScreen>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (adventures.looping) _loopBanner(),
+            if (conv != null && conv.announced) _convergenceChip(conv),
             if (lm != null || _landmarks.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
@@ -1036,7 +1277,8 @@ class _SpawnBadge extends StatelessWidget {
 }
 
 class _Beam extends StatelessWidget {
-  const _Beam();
+  const _Beam({this.colour = TK.signal});
+  final Color colour;
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
@@ -1046,8 +1288,8 @@ class _Beam extends StatelessWidget {
         begin: Alignment.bottomCenter,
         end: Alignment.topCenter,
         colors: [
-          TK.signal.withValues(alpha: 0.55),
-          TK.signal.withValues(alpha: 0),
+          colour.withValues(alpha: 0.55),
+          colour.withValues(alpha: 0),
         ],
       ),
     ),
@@ -1244,4 +1486,51 @@ class _WeatherSheet extends StatelessWidget {
       );
     },
   );
+}
+
+/// Where a Convergence will open: the Mythic's silhouette until it does.
+class _ConvergenceBeacon extends StatelessWidget {
+  const _ConvergenceBeacon(this.c);
+  final Convergence c;
+
+  @override
+  Widget build(BuildContext context) {
+    final sp = species[c.species];
+    return Bobbing(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: TK.night.withValues(alpha: 0.8),
+          border: Border.all(color: Grade.mythic.color, width: 3),
+          boxShadow: [BoxShadow(color: Grade.mythic.color.withValues(alpha: 0.6), blurRadius: 18, spreadRadius: 2)],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: c.open ? Image.asset(sp.sprite) : Silhouette(sp, size: 96),
+        ),
+      ),
+    );
+  }
+}
+
+/// A dead drop somewhere in this hex.
+class _DropCrate extends StatelessWidget {
+  const _DropCrate();
+
+  @override
+  Widget build(BuildContext context) => Bobbing(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: TK.night.withValues(alpha: 0.85),
+            border: Border.all(color: TK.drop, width: 2.5),
+          ),
+          child: const FittedBox(
+            child: Padding(
+              padding: EdgeInsets.all(6),
+              child: Icon(Icons.question_mark_rounded, color: TK.drop),
+            ),
+          ),
+        ),
+      );
 }

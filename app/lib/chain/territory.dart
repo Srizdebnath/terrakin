@@ -18,8 +18,9 @@ class TerritoryPrices {
         cutBps = r.uint(3),
         landmarkCutBps = r.uint(4),
         bidStepBps = r.uint(5),
-        shield = Duration(seconds: r.uint(6));
-  final BigInt claim, attackFee, minBid;
+        shield = Duration(seconds: r.uint(6)),
+        loopPerHex = r.words > 7 ? r.big(7) : BigInt.zero;
+  final BigInt claim, attackFee, minBid, loopPerHex;
   final int cutBps, landmarkCutBps, bidStepBps;
   final Duration shield;
 }

@@ -11,6 +11,8 @@ class TK {
   static const mist = Color(0xFFB9B3CC);
   static const signal = Color(0xFFFFB547);
   static const danger = Color(0xFFFF5D6C);
+  static const loop = Color(0xFF4FD1E8); // Loop Capture trail
+  static const drop = Color(0xFFB98CFF); // dead drops
 
   static TextStyle display(double size, {Color color = paper}) => TextStyle(
         fontFamily: 'Fredoka',

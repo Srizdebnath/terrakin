@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:privy_flutter/privy_flutter.dart';
 
+import '../app_state.dart';
+
 /// Passkey sign-in and the player's embedded wallet, via Privy.
 ///
 /// Passkeys belong to [relyingParty]; the Android app is linked to it by
@@ -14,7 +16,10 @@ class AuthService extends ChangeNotifier {
   static const clientId = 'client-WY6etDEPUrW86E7cY9YUueM91yxH51Kcwq2m13Bm4VjSQ';
   static const relyingParty = 'https://terrakin.vercel.app';
 
-  late final Privy _privy;
+  // Created once per process: signing out returns to RootGate, which calls
+  // init() again, and the SDK must not be re-initialised.
+  Privy? _client;
+  Privy get _privy => _client!;
   bool ready = false;
   PrivyUser? user;
   EmbeddedEthereumWallet? wallet;
@@ -23,7 +28,7 @@ class AuthService extends ChangeNotifier {
   String? get address => wallet?.address;
 
   Future<void> init() async {
-    _privy = Privy.init(config: PrivyConfig(appId: appId, appClientId: clientId));
+    _client ??= Privy.init(config: PrivyConfig(appId: appId, appClientId: clientId));
     var state = await _privy.getAuthState();
     if (state is AuthenticatedUnverified) {
       await _privy.onNetworkRestored();
@@ -91,6 +96,8 @@ class AuthService extends ChangeNotifier {
     await _privy.logout();
     user = null;
     wallet = null;
+    chain.forget();
+    adventures.forget();
     notifyListeners();
   }
 }

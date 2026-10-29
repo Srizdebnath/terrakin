@@ -22,7 +22,7 @@ export default handler('POST', async (req) => {
     deadline: BigInt(Math.floor(Date.now() / 1000) + 120),
   };
   const signature = await operator().signTypedData({
-    domain: { name: 'Terrakin Territory', version: '1', chainId: monadTestnet.id, verifyingContract: territory() },
+    domain: { name: 'Terrakin Territory', version: '2', chainId: monadTestnet.id, verifyingContract: territory() },
     types: presenceTypes,
     primaryType: 'Presence',
     message: presence,

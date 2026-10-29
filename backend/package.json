@@ -6,7 +6,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "node --test --experimental-strip-types test/*.test.ts"
+    "test": "node --import ./test/ts-resolve.mjs --test --experimental-strip-types test/*.test.ts"
   },
   "dependencies": {
     "@privy-io/node": "^0.37.0",

@@ -4,9 +4,11 @@
 
 # Terrakin
 
-A location-based creature game on **Monad**. Walk the real world to bond with **Kin** at real places. You own each Kin as an NFT. You can claim the **hex** of map you stand in and take a cut of every catch inside it, defend it with on-chain auto-battles, bid on daily **Landmark** zones, fuse and duel Kin in **the Lab**, raid bosses with strangers, trade on a peer-to-peer market and post bounties. Every outcome settles on Monad testnet in about a second.
+A location-based creature game on **Monad**. Walk the real world to bond with **Kin** at real places. You own each Kin as an NFT. You can claim the **hex** of map you stand in and take a cut of every catch inside it, defend it with on-chain auto-battles, bid on daily **Landmark** zones, fuse and duel Kin in **the Lab**, raid bosses with strangers, trade on a peer-to-peer market and post bounties. Walk a **loop** around a neighbourhood to take every hex inside it, gather a real crowd at a park for a **Convergence** Mythic that nobody can bond alone, and hide MON or Kin in **dead drops** that only someone standing on the exact spot can open. Every outcome settles on Monad testnet in about a second.
 
 Android app (Flutter) · Solidity contracts (Foundry) · serverless backend (Vercel) · passkey wallets (Privy).
+
+**Why Monad:** every catch, battle, loop and circle resolves on-chain while you're still standing there, because Monad finalises a transaction in about a second, and thousands of players acting in different places don't queue behind each other, because Monad executes non-conflicting transactions in parallel. The code is plain EVM, so it also runs on any other EVM chain. See [Built on Monad, portable to any EVM chain](#12-built-on-monad-portable-to-any-evm-chain).
 
 ---
 
@@ -14,8 +16,8 @@ Android app (Flutter) · Solidity contracts (Foundry) · serverless backend (Ver
 
 | | |
 |---|---|
-| **APK (most phones, 64-bit)** | [`releases/terrakin-1.0.0-arm64.apk`](releases/terrakin-1.0.0-arm64.apk) (28 MB) · also on the [Releases page](../../releases/latest) |
-| APK (older 32-bit phones) | [`releases/terrakin-1.0.0-armv7.apk`](releases/terrakin-1.0.0-armv7.apk) (26 MB) |
+| **APK (most phones, 64-bit)** | [`releases/terrakin-1.1.0-arm64.apk`](releases/terrakin-1.1.0-arm64.apk) (28 MB) · also on the [Releases page](../../releases/latest) |
+| APK (older 32-bit phones) | [`releases/terrakin-1.1.0-armv7.apk`](releases/terrakin-1.1.0-armv7.apk) (26 MB) |
 | Checksums | [`releases/SHA256SUMS.txt`](releases/SHA256SUMS.txt) · signer SHA-256 `62:D7:F3:B3:…:EA:1C:D1:86` |
 | Requirements | Android 9+ (API 28), arm64 phone, GPS, a screen lock (needed for passkeys) |
 | Network | Monad testnet (chain id `10143`). New players are funded automatically: 0.2 MON and 10 Seed Orbs |
@@ -41,13 +43,15 @@ The repo is private, so the links work for collaborators while signed in to GitH
 |---|---|---|
 | `Terrakin` | [`0x2C1734aD317A22272053673C67b02E9789b8e895`](https://testnet.monadexplorer.com/address/0x2C1734aD317A22272053673C67b02E9789b8e895) | Kin NFTs, names, orbs, catches, trades, reward pool, module registry |
 | `TerrakinCharacters` | [`0xE9361BaF271A19fE13A75AdBE42AAb4875389698`](https://testnet.monadexplorer.com/address/0xE9361BaF271A19fE13A75AdBE42AAb4875389698) | Wayfinder character NFTs |
-| `TerrakinTerritory` | [`0x4a448f8c3054824D4311b2EefB92b73657E7Df24`](https://testnet.monadexplorer.com/address/0x4a448f8c3054824D4311b2EefB92b73657E7Df24) | Hexes, defenders, hex battles, Landmark auctions |
+| `TerrakinTerritory` v2 | [`0x62c8d2A52FCB6A88A38CD3940AF91ECcC53b594F`](https://testnet.monadexplorer.com/address/0x62c8d2A52FCB6A88A38CD3940AF91ECcC53b594F) | Hexes, defenders, hex battles, Landmark auctions, Loop Capture (v1 [`0x4a44…Df24`](https://testnet.monadexplorer.com/address/0x4a448f8c3054824D4311b2EefB92b73657E7Df24) retired, owners migrated) |
 | `TerrakinLab` | [`0x860Bb642cE6C279B7915a73e176dd11D09974e04`](https://testnet.monadexplorer.com/address/0x860Bb642cE6C279B7915a73e176dd11D09974e04) | Fusion, re-rolls, orb packs, staked duels (module) |
 | `TerrakinCrews` | [`0x70442C6a89493555dD1719529918d1C1B0480Bb2`](https://testnet.monadexplorer.com/address/0x70442C6a89493555dD1719529918d1C1B0480Bb2) | Crews, treasuries |
 | `TerrakinSeason` | [`0x6E21b711140e26a13fd44ff40B15291Cf4b3b9b2`](https://testnet.monadexplorer.com/address/0x6E21b711140e26a13fd44ff40B15291Cf4b3b9b2) | Seasons, capped Mythics, player registry, leaderboard |
 | `TerrakinMarket` | [`0xb3bB15dCaF65e180d0C9791e769123A8CE8AF513`](https://testnet.monadexplorer.com/address/0xb3bB15dCaF65e180d0C9791e769123A8CE8AF513) | Peer-to-peer Kin market |
 | `TerrakinBounties` | [`0x00dce6e923AD74FaF5b8A3f890Ee7e8F0A05F183`](https://testnet.monadexplorer.com/address/0x00dce6e923AD74FaF5b8A3f890Ee7e8F0A05F183) | Location bounties |
 | `TerrakinRaids` | [`0x4bf777687D518F0AeAd54F5bc73B6502F04727AD`](https://testnet.monadexplorer.com/address/0x4bf777687D518F0AeAd54F5bc73B6502F04727AD) | Landmark raid bosses (module) |
+| `TerrakinConvergence` | [`0x8a521d4c6BC649f0BCc9bc4dB585197a77795A8D`](https://testnet.monadexplorer.com/address/0x8a521d4c6BC649f0BCc9bc4dB585197a77795A8D) | Daily crowd-only Mythics at real parks (module) |
+| `TerrakinDrops` | [`0xF357fDbd1e4235bD1Af500B2fa47420238646534`](https://testnet.monadexplorer.com/address/0xF357fDbd1e4235bD1Af500B2fa47420238646534) | Dead drops: MON and Kin locked to a sealed spot |
 | Operator / voucher signer | [`0x87435f913da1B8364aB5Ef514Ee1A20736a4f42D`](https://testnet.monadexplorer.com/address/0x87435f913da1B8364aB5Ef514Ee1A20736a4f42D) | Signs vouchers, funds players, owns the contracts |
 
 ---
@@ -65,8 +69,10 @@ The repo is private, so the links work for collaborators while signed in to GitH
 9. [Seasons, leaderboards, crews](#8-seasons-leaderboards-crews) (32–34)
 10. [Market, bounties, raids](#9-market-bounties-raids) (35–38)
 11. [Economy](#10-economy) (39–41)
-12. [Repository layout and building](#repository-layout)
-13. [Tests](#tests) · [Design decisions](#design-decisions) · [Known limits](#known-limits)
+12. [Adventures: loops, Convergence, dead drops](#11-adventures-loops-convergence-dead-drops) (42–46)
+13. [Built on Monad, portable to any EVM chain](#12-built-on-monad-portable-to-any-evm-chain) (47–53)
+14. [Repository layout and building](#repository-layout)
+15. [Tests](#tests) · [Design decisions](#design-decisions) · [Known limits](#known-limits)
 
 ## What you can do
 
@@ -88,6 +94,9 @@ The repo is private, so the links work for collaborators while signed in to GitH
 | **Kin market** | List and buy Kin. Escrow-free, 3% fee | `TerrakinMarket` |
 | **Bounties** | "Catch me X within R km by T." The Kin is delivered to the poster | `TerrakinBounties` |
 | **Raids** | A daily boss per Landmark with shared HP. Loot is split by damage, plus orbs | `TerrakinRaids` |
+| **Loop Capture** | Walk a closed loop of 6+ hexes. Free hexes on and inside it become yours, rivals' undefended hexes inside flip. A rival taking a trail hex mid-walk cuts the loop | `TerrakinTerritory.claimLoop` |
+| **Convergence** | Once a day per zone, a Mythic at a real OpenStreetMap park for 20 minutes. Bonds only when 3+ players stand there within 5 minutes of each other; each gets one | `TerrakinConvergence.join` |
+| **Dead Drops** | Lock MON and/or a Kin at your exact spot with a riddle. Finders must stand within 25 m; the spot is sealed on-chain | `TerrakinDrops` |
 | **Share cards** | 1080×1350 meme cards after big moments | Local render |
 | **Tone** | Normal or Unhinged (Gen Z and crypto slang) copy | Local |
 | **Sound** | Weather-aware music and 16 effects, all synthesised in code | Local |
@@ -103,18 +112,20 @@ flowchart LR
   subgraph Phone["Android phone"]
     App["Flutter app<br/>map, catching, territory, Lab, social"]
     Wallet["Privy embedded wallet<br/>unlocked by passkey"]
-    GPS["GPS + compass"]
+    GPS["GPS + compass<br/>→ Kalman-filtered fixes"]
     BT["Bluetooth / Wi-Fi Direct<br/>(trades)"]
   end
   subgraph Vercel["terrakin.vercel.app"]
-    API["Serverless API<br/>config, fund, voucher,<br/>presence, raidpass, enroll, health"]
+    API["Serverless API (10 functions)<br/>config, fund, voucher, presence, raidpass,<br/>enroll, health, loop, convergence, drop"]
     AL["/.well-known/assetlinks.json"]
   end
   subgraph Monad["Monad testnet"]
     Core["Terrakin core"]
-    Mods["Territory, Lab, Season, Crews,<br/>Market, Bounties, Raids"]
+    Mods["Territory v2 (loops), Lab, Season, Crews,<br/>Market, Bounties, Raids"]
+    Adv["Convergence, Drops"]
   end
   Privy["Privy auth"]
+  OSM["OpenStreetMap Nominatim<br/>(Convergence parks)"]
   Tiles["OpenFreeMap vector tiles"]
   Meteo["Open-Meteo weather"]
 
@@ -126,8 +137,11 @@ flowchart LR
   API -- "verify token, find wallet" --> Privy
   API -- "operator txs, signatures" --> Core
   API --> Mods
+  API -- "read sealed drop spots" --> Adv
+  API --> OSM
   App -- "eth_call, signed raw txs" --> Core
   App --> Mods
+  App --> Adv
   App --> Tiles
   App --> Meteo
   API --> Meteo
@@ -143,7 +157,8 @@ flowchart TB
   C["Contracts<br/>verify every signature and rule"]
   P -- "cannot mint a Kin without a voucher" --> C
   O -- "cannot move a player's MON or Kin" --> C
-  O -- "can only: fund once per wallet, sign spawn and presence facts, reserve Mythic slots" --> C
+  O -- "can only: fund once per wallet, sign spawn, presence, loop,<br/>circle and drop-spot facts, reserve Mythic slots" --> C
+  O -- "cannot open a drop for itself: claims need the finder's own wallet<br/>and a drop's MON and Kin only ever go to finder or dropper" --> C
   C -- "pays rewards from the pool, enforces ownership" --> P
 ```
 
@@ -179,6 +194,13 @@ flowchart LR
   T --> OI
   CH --> OI
   CR -- "fees" --> T
+  CV["TerrakinConvergence"]
+  DR["TerrakinDrops"]
+  CV -- "module: mint Mythics" --> T
+  DR -- "escrow Kin: transferFrom" --> T
+  TE -- "claimLoop: signer()" --> T
+  CV -- "signer()" --> T
+  DR -- "signer()" --> T
 ```
 
 **Diagram 4. App layers**
@@ -186,20 +208,20 @@ flowchart LR
 ```mermaid
 flowchart TB
   subgraph UI["screens/"]
-    W[world_screen] --- HS[hex_sheet] --- LS[lab_screen] --- SS[season_screen] --- BZ[bazaar_screen] --- RS[raid_sheet] --- BS[battle_screen] --- BD[bond_screen]
+    W[world_screen] --- HS[hex_sheet] --- LS[lab_screen] --- SS[season_screen] --- BZ[bazaar_screen] --- RS[raid_sheet] --- BS[battle_screen] --- BD[bond_screen] --- AD[adventure_sheet]
   end
   subgraph Svc["chain/ (services)"]
-    GC[GameChain] --- TS[TerritoryService] --- LB[LabService] --- SO[SocialService] --- CM[CommerceService] --- AU[AuthService]
+    GC[GameChain] --- TS[TerritoryService] --- LB[LabService] --- SO[SocialService] --- CM[CommerceService] --- AV[AdventureService] --- AU[AuthService]
   end
   subgraph Core["core/ (pure logic)"]
-    HG[hexgrid] --- BT[battle] --- SP[species / kin_stats] --- CP[copy] --- SN[sound] --- EC[economy]
+    HG[hexgrid] --- BT[battle] --- SP[species / kin_stats] --- CP[copy] --- SN[sound] --- EC[economy] --- GF[gps_filter]
   end
   subgraph Data["data/ + world/"]
     SE[spawn_engine] --- LO[location] --- WE[weather] --- WS[world_store / mvt]
   end
   UI --> Svc --> Core
   UI --> Data
-  Svc --> RPC[(Monad RPC)]
+  Svc --> RPC[("EVM RPC (Monad testnet)")]
   Svc --> API[(Vercel API)]
 ```
 
@@ -214,6 +236,10 @@ flowchart LR
   E["POST /api/raidpass"] --> E1["within 150 m of today's Landmark, sign Pass"]
   F["POST /api/enroll"] --> F1["TerrakinSeason.enrollFor(player)"]
   G["GET /api/health"] --> G1["pool MON, operator MON, players left"]
+  H["POST /api/loop"] --> H1["{lat,lng}: HMAC walk stamp for this hex<br/>{stamps}: check walk, flood-fill, sign Loop"]
+  I["GET /api/convergence"] --> I1["zone's park, species, opening time"]
+  J["POST /api/convergence"] --> J1["within 40 m while open: sign Pass"]
+  K["POST /api/drop"] --> K1["{lat,lng}: seal spot, sign Spot<br/>{dropId}: unseal, 25 m → sign Claim, else warm/cold"]
 ```
 
 **Diagram 6. Code shared bit for bit between Dart, TypeScript and Solidity**
@@ -761,7 +787,7 @@ flowchart LR
 ```mermaid
 flowchart LR
   subgraph In["Into the pool"]
-    i1["character mints"] --- i2["orb buys"] --- i3["hex claims"] --- i4["lost attack fees"] --- i5["auction wins"] --- i6["Lab fees, packs"] --- i7["5% duel house"] --- i8["3% market / bounty fees"] --- i9["5% raid house"] --- i10["crew founding"]
+    i1["character mints"] --- i2["orb buys"] --- i3["hex claims"] --- i4["lost attack fees"] --- i5["auction wins"] --- i6["Lab fees, packs"] --- i7["5% duel house"] --- i8["3% market / bounty fees"] --- i9["5% raid house"] --- i10["crew founding"] --- i11["loop captures"]
   end
   POOL(("Reward pool"))
   subgraph Out["Out of the pool"]
@@ -789,8 +815,241 @@ xychart-beta
 | Trade reward | +0.01 (3 a day) | Re-roll | 0.005 |
 | Crew founding | 0.02 | Orb pack | 0.01 |
 | Raid entry | 0.01 | Duel stake | from 0.005 |
+| Loop Capture | 0.002 per hex taken | Dead drop | from 0.001 (or a Kin) |
 
 All prices are adjustable on-chain (`setPrices`) without a redeploy.
+
+---
+
+## 11. Adventures: loops, Convergence, dead drops
+
+Three features that only work if your body is somewhere real. The backend proves where you are, and the contracts settle what happens. None of them can be done from a sofa without spoofing GPS.
+
+**Diagram 42. Loop Capture, end to end**
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant P as Phone
+  participant B as Backend /api/loop
+  participant T as TerrakinTerritory v2
+  P->>B: { lat, lng } on entering each new hex
+  B-->>P: stamp = HMAC(wallet, hexId, time)
+  Note over P: stamps kept on the phone (survive app restarts, 2 h max)
+  P->>B: { stamps } back in the starting hex
+  B->>B: verify HMACs, order, ≥15 s per hex, ≤2 h, closed
+  B->>B: fill one-hex GPS gaps, flood-fill the enclosed hexes
+  B-->>P: trail[], inside[], startedAt, EIP-712 signature
+  P->>T: claimLoop(startedAt, deadline, trail, inside, sig) + MON
+  T->>T: revert Cut(hex) if a rival took a trail hex after startedAt
+  T-->>P: LoopClosed(taken[]) and refund of unused MON
+```
+
+**Diagram 43. What a closed loop takes**
+
+```mermaid
+flowchart TD
+  H["Hex on the trail or inside the loop"] --> O{"Owner?"}
+  O -- "nobody" --> TAKE["Yours (0.002 MON)"]
+  O -- "you" --> SKIP1["Already yours"]
+  O -- "rival" --> W{"Trail or inside?"}
+  W -- "trail, taken after you started" --> CUT["Whole loop is cut: reverts"]
+  W -- "trail, held before you started" --> SKIP2["Stays theirs"]
+  W -- "inside" --> S{"Shielded or has live defenders?"}
+  S -- "yes" --> SKIP3["Holds out"]
+  S -- "no" --> FLIP["Surrounded: flips to you"]
+```
+
+**Diagram 44. A Convergence circle**
+
+```mermaid
+stateDiagram-v2
+  [*] --> Announced: 1 h before opening (schedule from zone + day)
+  Announced --> Open: opensAt
+  Open --> Gathering: first pass joins
+  Gathering --> Gathering: joins, fewer than 3 within 5 min
+  Gathering --> Circle: 3rd player within 5 min
+  Circle --> Circle: latecomer while 3+ still within 5 min, bonds at once
+  Circle --> Closed: 20 min after opening
+  Gathering --> Closed: 20 min, nobody bonds
+  Closed --> [*]
+```
+
+**Diagram 45. Joining a Convergence**
+
+```mermaid
+sequenceDiagram
+  participant P as Phone
+  participant B as Backend /api/convergence
+  participant N as OpenStreetMap (Nominatim)
+  participant C as TerrakinConvergence
+  participant G as Terrakin
+  P->>B: GET ?lat&lng
+  B->>N: named parks in the zone (cached a day)
+  B-->>P: today's place, species, opensAt (hash of zone + day)
+  P->>B: POST { lat, lng, id } within 40 m while open
+  B-->>P: signed Pass(eventId, species, spot, opensAt)
+  P->>C: join(pass, sig)
+  C->>C: count joins in the last 5 min
+  alt 3 or more
+    C->>G: moduleMint(Mythic, vigor 10-15) for each in the circle
+  end
+```
+
+**Diagram 46. Dead drop: sealed spot, hot and cold**
+
+```mermaid
+sequenceDiagram
+  participant A as Dropper
+  participant B as Backend /api/drop
+  participant D as TerrakinDrops
+  participant F as Finder
+  A->>B: { lat, lng }
+  B->>B: AES-256-GCM seal(lat, lng) with a server-only key
+  B-->>A: sealed spot, hexId, signature over keccak(sealed)
+  A->>D: drop(spot, sig, sealed, riddle, kin?, forWho?, expiry) + MON
+  Note over D: on-chain: hex (~150 m) and riddle in the clear, spot sealed
+  F->>B: { lat, lng, dropId }
+  B->>D: sealedSpotOf(dropId)
+  B->>B: unseal, distance to finder
+  alt within 25 m
+    B-->>F: signed Claim
+    F->>D: claim(claim, sig): MON and Kin to finder
+  else within 60 m
+    B-->>F: "warm" (never a distance)
+  else
+    B-->>F: "cold"
+  end
+```
+
+---
+
+## 12. Built on Monad, portable to any EVM chain
+
+Terrakin is a game you play standing on a street corner. The chain has to answer before you walk on, and it has to keep answering when thousands of people do the same thing in different places at once. Monad provides both: about **1 s from send to final receipt** in our testing, and **parallel execution** of transactions that don't touch the same state. The contracts are written so that both actually help.
+
+### Fast finality: the game waits for the chain, not the other way round
+
+The app sends a transaction, polls for the receipt every 200 ms, and treats the **first receipt as final**: no confirmation count, no optimistic UI to roll back. Results are read straight from the receipt's logs and shown on screen.
+
+**Diagram 47. One action, start to finish**
+
+```mermaid
+sequenceDiagram
+  participant P as Player
+  participant A as App
+  participant B as Backend
+  participant M as Monad
+  P->>A: tap (throw orb, attack, close loop, step into circle, search drop)
+  A->>B: proof request with GPS fix
+  B-->>A: EIP-712 signature (valid 2-10 min)
+  par one round trip
+    A->>M: eth_estimateGas
+    A->>M: nonce, base fee, tip
+  end
+  A->>A: sign with passkey wallet
+  A->>M: eth_sendRawTransaction
+  loop every 200 ms
+    A->>M: eth_getTransactionReceipt
+  end
+  M-->>A: receipt + logs (~1 s, final)
+  A->>P: result from logs: Kin revealed, battle replayed from seed,<br/>hexes taken, Mythic bonded, drop opened
+```
+
+**Diagram 48. Where fast finality carries the gameplay**
+
+```mermaid
+flowchart LR
+  F(("~1 s<br/>finality"))
+  F --> C1["Catching<br/>the reveal animation waits on the Bonded event"]
+  F --> C2["Hex battles and raids<br/>replayed on the phone from the block's seed in the receipt"]
+  F --> C3["Face-to-face trades<br/>propose and accept while both phones are still within 8 m"]
+  F --> C4["Signed proofs<br/>presence and raid passes live only 120 s, so they must land fast"]
+  F --> C5["Loop Capture<br/>the race against rivals cutting your trail is settled per block"]
+  F --> C6["Convergence<br/>'3 together within 5 min' is counted from block timestamps;<br/>everyone sees the circle fill live"]
+  F --> C7["Dead drops<br/>the finder holds the Kin before leaving the spot"]
+```
+
+### Parallel execution: players in different places don't queue
+
+Monad runs a block's transactions in parallel and re-executes only the ones that turn out to touch the same storage. So the contracts keep each player's and each place's state in separate storage slots:
+
+**Diagram 49. Storage laid out for parallelism**
+
+```mermaid
+flowchart TB
+  subgraph Disjoint["Keyed per player or per place: runs in parallel"]
+    K1["Kin ids = hash(player, spawn)<br/>no global token counter"]
+    K2["OwnerIndexed: per-owner Kin lists<br/>no global enumeration"]
+    K3["per-player randomness nonces (Lab)"]
+    K4["hexes[hexId]: a loop in one city never<br/>touches a loop in another"]
+    K5["drop ids = hash(dropper, n)<br/>no global drop counter"]
+    K6["Convergence state per event (zone + day)"]
+    K7["raid state per Landmark zone + day"]
+  end
+  subgraph Shared["Deliberately shared: conflicts possible"]
+    S1["reward pool balance<br/>(every catch pays out of it)"]
+    S2["one event's attendee list<br/>(the point is a crowd in one place)"]
+    S3["one raid boss's HP"]
+  end
+```
+
+**Diagram 50. A busy block**
+
+```mermaid
+flowchart LR
+  subgraph Block["One Monad block"]
+    direction TB
+    t1["Kolkata: catch (hex A)"]
+    t2["Mumbai: claimLoop (hexes B…)"]
+    t3["Delhi: drop (id hash(dropper, 3))"]
+    t4["Pune: fuse (player nonce)"]
+    t5["Kolkata park: join circle"]
+    t6["Kolkata park: join circle"]
+  end
+  t1 & t2 & t3 & t4 --> P["executed in parallel:<br/>disjoint storage"]
+  t5 & t6 --> R["same event: one re-executes after the other<br/>(correct either way, just not parallel)"]
+```
+
+**Diagram 51. Monad bills the gas limit, so the app sets it tightly**
+
+```mermaid
+flowchart LR
+  E["eth_estimateGas"] --> L["limit = estimate + 2% + 2,000<br/>(+20-40% when the path depends on block randomness:<br/>battles, raids, loops, circles)"]
+  L --> M["max fee = 1.25 × base fee + tip<br/>(a starter wallet must hold limit × max fee)"]
+  M --> S["fee shown in the activity log<br/>= limit × effective price"]
+```
+
+### Chain-agnostic by construction
+
+Nothing is Monad-only: no precompiles, no Monad-specific opcodes, standard OpenZeppelin ERC-721 and EIP-712. The Monad-specific parts are tuning, not dependencies, and they're harmless elsewhere: tight gas limits, receipt polling, per-player storage keys. Moving chains is configuration:
+
+**Diagram 52. What's portable and what's configured**
+
+```mermaid
+flowchart TB
+  subgraph Portable["Same code on any EVM chain"]
+    P1["Solidity 0.8.28 + OpenZeppelin 5<br/>ERC-721, EIP-712, ECDSA"]
+    P2["Backend signs EIP-712 with viem;<br/>the domain takes chain id + contract from config"]
+    P3["App: raw JSON-RPC, EIP-1559 type-2 txs,<br/>Privy embedded EVM wallet"]
+  end
+  subgraph Config["Configured per chain"]
+    C1["backend env: CHAIN_ID, RPC_URL, EXPLORER_URL,<br/>*_ADDRESS for each contract"]
+    C2["GET /api/config → the app reads chain id, RPC,<br/>explorer and addresses at every launch"]
+    C3["setPrices(): every price is on-chain config"]
+  end
+  Portable --- Config
+```
+
+**Diagram 53. Moving Terrakin to another EVM chain**
+
+```mermaid
+flowchart LR
+  A["forge script Deploy*.s.sol<br/>--rpc-url NEW_CHAIN"] --> B["set CHAIN_ID, RPC_URL, EXPLORER_URL<br/>and contract addresses on Vercel"]
+  B --> C["vercel deploy --prod"]
+  C --> D["installed apps pick up the new chain<br/>on next launch: no app update"]
+  D --> E["optional: setPrices() for the<br/>new chain's gas token"]
+```
 
 ---
 
@@ -860,21 +1119,24 @@ python art/tools/audio.py                          # needs numpy, scipy, ffmpeg
 | Suite | Count | Covers |
 |---|---|---|
 | `contracts/test/Terrakin.t.sol` | 12 | names, grant, orbs, vouchers, trades, packing, pool running dry |
-| `TerrakinTerritory.t.sol` | 9 | claims, cut, shields, captures, stale defenders, auctions, battle vectors |
+| `TerrakinTerritory.t.sol` | 14 | claims, cut, shields, captures, stale defenders, auctions, battle vectors, loops, cut loops, migration |
 | `TerrakinLab.t.sol` | 7 | fusion odds, re-rolls, packs, duels, stale duels, modules |
 | `TerrakinSocial.t.sol` | 5 | Mythic caps, seasons, leaderboard, crews end to end |
 | `TerrakinCommerce.t.sol` | 6 | market, stale listings, bounty matching, raids, loot |
-| `app/test` | 27 | hex grid, battle vectors, ABI, spawns, economy, trade rules |
-| `backend/test` | 4 | 550 spawn vectors, 540 hex vectors |
+| `TerrakinAdventures.t.sol` | 7 | Convergence circles, stragglers, forged passes, drops, addressed drops, expiry, tampered spots |
+| `app/test` | 34 | hex grid, battle vectors, ABI (incl. loop, join and drop calldata vs `cast`), spawns, economy, trade rules, GPS filter |
+| `backend/test` | 9 | 550 spawn vectors, 540 hex vectors, loop flood-fill, gap filling, anti-driving, stamp forgery, sealed spots |
 | `backend/scripts/e2e-anvil.ts` | end to end | backend-signed voucher + presence accepted on a local chain |
 
 ## Design decisions
 
-- **Monad-friendly state.** Kin ids are hashes, randomness nonces are per player, and there's no global token list (`OwnerIndexed`). Different players' transactions don't touch the same storage, so they run in parallel.
+- **Monad-friendly state.** Kin ids and drop ids are hashes, randomness nonces are per player, and there's no global token list (`OwnerIndexed`). Most transactions by different players touch different storage, so Monad runs them in parallel. The exceptions are deliberate: the shared reward pool balance, and the crowd at a single Convergence or raid (see diagram 49).
 - **Monad bills the gas limit**, not gas used. The app sets the limit to the estimate plus 2% (30% for random-path calls), and the deploy uses a 110% multiplier.
 - **Module registry.** New features (Lab, raids, and later ones) are separate contracts that `Terrakin` authorises with `setModule`. Players' Kin and profiles never need a redeploy.
 - **No trigonometry on-chain.** Hex and zone ids are computed off-chain with identical integer maths and arrive signed.
 - **Escrow-free market.** A listed Kin stays usable (it can defend, duel and raid) until it sells.
+- **Proof of presence without a database.** Loop stamps are HMACs and drop spots are AES-sealed on-chain, both under keys derived from the operator key, so the backend stays stateless.
+- **Smoothed GPS.** A Kalman filter weighs each fix by its accuracy, drops impossible jumps and holds still when you're standing, so the dot doesn't drift and jitter doesn't count as walking.
 - **Sound is ours.** Every note and effect is synthesised by `art/tools/audio.py`. No samples, no licences.
 
 ## Known limits
@@ -883,4 +1145,7 @@ python art/tools/audio.py                          # needs numpy, scipy, ffmpeg
 - **GPS can be spoofed.** The backend checks distance against the reported position. Speed and plausibility checks are the next hardening step.
 - **The Mythic cap is enforced by the voucher signer** and counted publicly on-chain. The catch function itself doesn't enforce it.
 - **Hex grid seams** every 1° of longitude (about 100 km) cut the hexes on that line in half.
+- **Convergence needs a mapped park.** Places come from OpenStreetMap via Nominatim. A zone with no named park in OSM gets no Convergence; add one on openstreetmap.org and it appears within a day.
+- **Convergence needs 3 phones.** It's built for a crowd, so solo testing ends at "waiting for the circle".
+- **Vercel Hobby allows 12 functions.** The backend uses 10, so related endpoints share a function.
 - **APKs are published for arm64 and armv7.** x86_64 (emulators) builds from source.

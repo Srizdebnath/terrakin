@@ -116,10 +116,16 @@ class GameChain extends ChangeNotifier {
     '0x84c77753': 'The boss already fell today.',
     '0xa0fa2997': 'Loot unlocks when the boss falls or the day ends.',
     '0xf9820cc1': 'Nothing to claim.',
+    '0x1c2506c8': 'Your loop was cut: a rival took a hex on your trail while you walked.',
+    '0x6954f21c': 'That loop doesn\'t work. Walk at least 6 hexes around something.',
+    '0x1cdde67b': 'This Convergence isn\'t open right now.',
+    '0x003b2682': 'You\'re already in this circle.',
+    '0x9445b059': 'Check the drop: a riddle up to 140 characters, 1 h-30 days, and MON or a Kin inside.',
+    '0x72ec8f1a': 'That drop is gone.',
   };
 
   late MonadRpc rpc;
-  String game = '', characters = '', territory = '', lab = '', crews = '', season = '', market = '', bounties = '', raids = '', explorer = 'https://testnet.monadexplorer.com';
+  String game = '', characters = '', territory = '', lab = '', crews = '', season = '', market = '', bounties = '', raids = '', convergence = '', drops = '', explorer = 'https://testnet.monadexplorer.com';
   bool configured = false;
 
   BigInt balance = BigInt.zero;
@@ -148,12 +154,28 @@ class GameChain extends ChangeNotifier {
     market = c['market'] as String? ?? '';
     bounties = c['bounties'] as String? ?? '';
     raids = c['raids'] as String? ?? '';
+    convergence = c['convergence'] as String? ?? '';
+    drops = c['drops'] as String? ?? '';
     explorer = c['explorer'] as String? ?? explorer;
     configured = game.isNotEmpty;
     final prefs = await SharedPreferences.getInstance();
     txs
       ..clear()
       ..addAll([for (final s in prefs.getStringList('txlog.v1') ?? const <String>[]) TxRecord.fromJson(jsonDecode(s))]);
+  }
+
+  /// Drops the signed-out player's state so the next account starts clean.
+  void forget() {
+    _poll?.cancel();
+    _poll = null;
+    balance = BigInt.zero;
+    name = '';
+    funded = false;
+    orbs = [0, 0, 0, 0];
+    characterTokens = [];
+    kin = [];
+    syncedAt = null;
+    notifyListeners();
   }
 
   /// Keeps balance and inventory fresh while the app is open.

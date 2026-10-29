@@ -38,6 +38,30 @@ class BackendApi {
   static Future<Map<String, dynamic>> raidPass(String token, double lat, double lng) =>
       _req('POST', '/api/raidpass', token: token, body: {'lat': lat, 'lng': lng});
 
+  /// Loop Capture: a stamp for the hex the player is walking through.
+  static Future<Map<String, dynamic>> loopStamp(String token, double lat, double lng) =>
+      _req('POST', '/api/loop', token: token, body: {'lat': lat, 'lng': lng});
+
+  /// Loop Capture: checks the walk and signs the trail and enclosed hexes.
+  static Future<Map<String, dynamic>> closeLoop(String token, List<Map<String, dynamic>> stamps) =>
+      _req('POST', '/api/loop', token: token, body: {'stamps': stamps});
+
+  /// Today's and tomorrow's Convergence for the zone around ([lat], [lng]).
+  static Future<Map<String, dynamic>> convergences(double lat, double lng) =>
+      _req('GET', '/api/convergence?lat=$lat&lng=$lng');
+
+  /// Signed pass into a Convergence circle, given while standing at it.
+  static Future<Map<String, dynamic>> convergencePass(String token, double lat, double lng, String id) =>
+      _req('POST', '/api/convergence', token: token, body: {'lat': lat, 'lng': lng, 'id': id});
+
+  /// Seals the spot the player stands at, for leaving a dead drop.
+  static Future<Map<String, dynamic>> dropSpot(String token, double lat, double lng) =>
+      _req('POST', '/api/drop', token: token, body: {'lat': lat, 'lng': lng});
+
+  /// Searches for drop [id] here: cold, warm, or a signed claim.
+  static Future<Map<String, dynamic>> dropClaim(String token, double lat, double lng, BigInt id) =>
+      _req('POST', '/api/drop', token: token, body: {'lat': lat, 'lng': lng, 'dropId': '$id'});
+
   static Future<Map<String, dynamic>> voucher(String token, Map<String, Object?> body) =>
       _req('POST', '/api/voucher', token: token, body: body);
 }

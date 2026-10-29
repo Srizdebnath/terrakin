@@ -35,6 +35,7 @@ contract Deploy is Script {
         t.landmarkCutBps = 2500; // 25% of Landmark catches to the zone's auction winner
         t.bidStepBps = 500;
         t.shield = 30 minutes;
+        t.loopPerHex = 0.002 ether;
 
         TerrakinLab.Prices memory l;
         l.fuse = 0.01 ether;

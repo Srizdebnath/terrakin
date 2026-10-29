@@ -52,6 +52,7 @@ contract TerritoryTest is Test {
         t.landmarkCutBps = 2500;
         t.bidStepBps = 500;
         t.shield = 30 minutes;
+        t.loopPerHex = 0.002 ether;
     }
 
     // ------------------------------------------------------------- helpers
@@ -327,5 +328,103 @@ contract TerritoryTest is Test {
         l = new uint64[](2);
         l[0] = x;
         l[1] = y;
+    }
+
+    // --------------------------------------------------------- loop capture
+
+    function ids(uint64 first, uint256 n) internal pure returns (uint64[] memory l) {
+        l = new uint64[](n);
+        for (uint256 i; i < n; ++i) l[i] = first + uint64(i);
+    }
+
+    function loopSig(address who, uint64 startedAt, uint64[] memory trail, uint64[] memory inside)
+        internal
+        view
+        returns (uint64 deadline, bytes memory sig)
+    {
+        deadline = uint64(vm.getBlockTimestamp() + 300);
+        (uint8 r8, bytes32 r, bytes32 s) = vm.sign(signerKey, land.loopDigest(who, startedAt, trail, inside, deadline));
+        sig = abi.encodePacked(r, s, r8);
+    }
+
+    function test_loopTakesFreeHexesAndRefunds() public {
+        uint64[] memory trail = ids(HEX + 100, 7);
+        uint64[] memory inside = ids(HEX + 200, 3);
+        uint64 start = uint64(block.timestamp - 600);
+        (uint64 dl, bytes memory sig) = loopSig(alice, start, trail, inside);
+        uint256 before = alice.balance;
+        vm.prank(alice);
+        uint64[] memory taken = land.claimLoop{value: 0.1 ether}(start, dl, trail, inside, sig);
+        assertEq(taken.length, 10);
+        assertEq(before - alice.balance, 10 * 0.002 ether);
+        assertEq(land.hexesOf(alice).length, 10);
+    }
+
+    function test_loopSurroundsUndefendedButNotDefended() public {
+        uint256 b1 = strong(bob);
+        claimAs(bob, HEX + 200, one(b1)); // defended
+        uint256 b2 = weak(bob);
+        claimAs(bob, HEX + 201, one(b2));
+        vm.prank(bob);
+        game.transferFrom(bob, carol, b2); // HEX+201 is now undefended
+        vm.warp(block.timestamp + 31 minutes); // past the shield
+
+        uint64[] memory trail = ids(HEX + 100, 6);
+        uint64[] memory inside = ids(HEX + 200, 2);
+        uint64 start = uint64(block.timestamp - 60);
+        (uint64 dl, bytes memory sig) = loopSig(alice, start, trail, inside);
+        vm.prank(alice);
+        uint64[] memory taken = land.claimLoop{value: 1 ether}(start, dl, trail, inside, sig);
+        assertEq(taken.length, 7);
+        (address o200,,) = land.hexes(HEX + 200);
+        (address o201,,) = land.hexes(HEX + 201);
+        assertEq(o200, bob);
+        assertEq(o201, alice);
+    }
+
+    function test_loopIsCutWhenRivalTakesTrailHexMidWalk() public {
+        uint64[] memory trail = ids(HEX + 100, 6);
+        uint64[] memory inside = ids(HEX + 200, 1);
+        uint64 start = uint64(block.timestamp);
+        vm.warp(block.timestamp + 120);
+        claimAs(bob, HEX + 103, one(strong(bob)));
+        (uint64 dl, bytes memory sig) = loopSig(alice, start, trail, inside);
+        vm.prank(alice);
+        vm.expectRevert(abi.encodeWithSelector(TerrakinTerritory.Cut.selector, HEX + 103));
+        land.claimLoop{value: 1 ether}(start, dl, trail, inside, sig);
+    }
+
+    function test_loopRejectsForgedOrReplayedSignature() public {
+        uint64[] memory trail = ids(HEX + 100, 6);
+        uint64[] memory inside = ids(HEX + 200, 1);
+        uint64 start = uint64(block.timestamp);
+        (uint64 dl, bytes memory sig) = loopSig(alice, start, trail, inside);
+        vm.prank(bob); // signed for alice
+        vm.expectRevert(TerrakinTerritory.BadSignature.selector);
+        land.claimLoop{value: 1 ether}(start, dl, trail, inside, sig);
+        inside[0] = HEX + 999; // tampered list
+        vm.prank(alice);
+        vm.expectRevert(TerrakinTerritory.BadSignature.selector);
+        land.claimLoop{value: 1 ether}(start, dl, trail, inside, sig);
+    }
+
+    function test_migrateCopiesOwnersOnceThenLocks() public {
+        uint256 a = strong(alice);
+        uint64[] memory hs = new uint64[](1);
+        hs[0] = HEX;
+        address[] memory os = new address[](1);
+        os[0] = alice;
+        uint256[][] memory ds = new uint256[][](1);
+        ds[0] = one(a);
+        land.migrate(hs, os, ds);
+        (address o,,) = land.hexes(HEX);
+        assertEq(o, alice);
+        assertEq(land.defendersOf(HEX).length, 1);
+        land.closeMigration();
+        vm.expectRevert(TerrakinTerritory.BadAuction.selector);
+        land.migrate(hs, os, ds);
+        vm.prank(bob);
+        vm.expectRevert();
+        land.closeMigration();
     }
 }

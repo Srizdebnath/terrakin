@@ -1,5 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:latlong2/latlong.dart';
 
+import 'chain/adventures.dart';
 import 'chain/auth.dart';
 import 'chain/commerce.dart';
 import 'chain/game_chain.dart';
@@ -31,6 +34,7 @@ final territory = TerritoryService(chain);
 final lab = LabService(chain, territory);
 final social = SocialService(chain);
 final commerce = CommerceService(chain, territory);
+final adventures = AdventureService(chain, territory);
 
 /// Spawns that fled this session; they disappear from the map.
 final fledSpawns = <String>{};
@@ -107,10 +111,16 @@ class StrideTracker {
     final p = location.position;
     final last = _last;
     if (location.accuracy > 35) return;
-    _last = p;
-    if (last == null) return;
+    if (last == null) {
+      _last = p;
+      return;
+    }
     final d = const Distance().as(LengthUnit.Meter, last, p);
-    if (d < 3 || d > 150 || location.tooFast) return;
+    // Only count once we're clearly away from the last counted point, so
+    // jitter while standing never adds up but slow steps eventually do.
+    if (d < math.max(6, location.accuracy)) return;
+    _last = p;
+    if (d > 150 || location.tooFast) return;
     profile.addWalk(d);
     final b = buddy;
     if (b != null) collection.addStride(b.uid, d * strideMultiplier(b));

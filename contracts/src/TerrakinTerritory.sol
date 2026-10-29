@@ -44,6 +44,7 @@ contract TerrakinTerritory is EIP712, Ownable {
         uint16 landmarkCutBps; // auction winner's share of Landmark catches
         uint16 bidStepBps; // each bid beats the last by at least this much
         uint32 shield; // seconds a hex is safe after it changes hands
+        uint128 loopPerHex; // Loop Capture, per hex actually taken
     }
 
     struct Hex {
@@ -59,7 +60,11 @@ contract TerrakinTerritory is EIP712, Ownable {
     }
 
     bytes32 private constant PRESENCE_TYPEHASH = keccak256("Presence(address player,uint64 hexId,uint64 deadline)");
+    bytes32 private constant LOOP_TYPEHASH = keccak256(
+        "Loop(address player,uint64 startedAt,bytes32 trail,bytes32 inside,uint64 deadline)"
+    );
     uint256 public constant MAX_SQUAD = 3;
+    uint256 public constant MAX_LOOP = 160; // trail + inside hexes per loop
 
     // ------------------------------------------------------------------ state
 
@@ -73,6 +78,7 @@ contract TerrakinTerritory is EIP712, Ownable {
     mapping(uint64 => uint256) internal _ownedIndex;
     mapping(uint64 => mapping(uint32 => Bid)) public bids; // zone => UTC day => top bid
     mapping(address => uint256) public refunds; // outbid MON, withdrawn by its owner
+    bool public migrationClosed;
 
     // ----------------------------------------------------------------- events
 
@@ -89,6 +95,7 @@ contract TerrakinTerritory is EIP712, Ownable {
     );
     event BidPlaced(uint64 indexed zone, uint32 indexed day, address indexed bidder, uint256 amount);
     event AuctionSettled(uint64 indexed zone, uint32 indexed day, address winner, uint256 amount);
+    event LoopClosed(address indexed player, uint256 trail, uint256 inside, uint64[] taken);
 
     // ----------------------------------------------------------------- errors
 
@@ -103,8 +110,10 @@ contract TerrakinTerritory is EIP712, Ownable {
     error BadAuction();
     error BidTooLow();
     error TransferFailed();
+    error Cut(uint64 hexId);
+    error BadLoop();
 
-    constructor(ITerrakin game_, Prices memory prices_) EIP712("Terrakin Territory", "1") Ownable(msg.sender) {
+    constructor(ITerrakin game_, Prices memory prices_) EIP712("Terrakin Territory", "2") Ownable(msg.sender) {
         game = game_;
         _prices = prices_;
     }
@@ -188,6 +197,94 @@ contract TerrakinTerritory is EIP712, Ownable {
             if (!ok) _toPool(msg.value);
         }
         emit Battle(p.hexId, msg.sender, defender, won, seed, kin, liveIds);
+    }
+
+    // ----------------------------------------------------------- loop capture
+
+    /// @notice Loop Capture. The player walked a closed loop of adjacent hexes
+    /// ([trail], first == last) starting at [startedAt]; the backend checked
+    /// the walk and computed the hexes it encloses ([inside]). Free trail and
+    /// inside hexes become the player's, and so do rivals' inside hexes that
+    /// are neither shielded nor defended: they're surrounded. Defended hexes
+    /// stay put. If a rival took any trail hex after the walk began, the loop
+    /// was cut and nothing happens. Pays [Prices.loopPerHex] per hex taken;
+    /// send enough for every listed hex and the rest is refunded.
+    function claimLoop(
+        uint64 startedAt,
+        uint64 deadline,
+        uint64[] calldata trail,
+        uint64[] calldata inside,
+        bytes calldata sig
+    ) external payable returns (uint64[] memory taken) {
+        if (block.timestamp > deadline) revert Expired();
+        if (trail.length < 6 || inside.length == 0 || trail.length + inside.length > MAX_LOOP) revert BadLoop();
+        bytes32 digest = _hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    LOOP_TYPEHASH,
+                    msg.sender,
+                    startedAt,
+                    keccak256(abi.encodePacked(trail)),
+                    keccak256(abi.encodePacked(inside)),
+                    deadline
+                )
+            )
+        );
+        if (ECDSA.recover(digest, sig) != game.signer()) revert BadSignature();
+
+        for (uint256 i; i < trail.length; ++i) {
+            Hex storage h = hexes[trail[i]];
+            if (h.owner != address(0) && h.owner != msg.sender && h.since > startedAt) revert Cut(trail[i]);
+        }
+
+        taken = new uint64[](trail.length + inside.length);
+        uint256 n;
+        for (uint256 i; i < trail.length; ++i) {
+            Hex storage h = hexes[trail[i]];
+            if (h.owner == address(0)) {
+                _setOwner(trail[i], h, msg.sender);
+                taken[n++] = trail[i];
+            }
+        }
+        for (uint256 i; i < inside.length; ++i) {
+            uint64 id = inside[i];
+            Hex storage h = hexes[id];
+            address o = h.owner;
+            if (o == msg.sender) continue;
+            if (o != address(0) && (block.timestamp < h.shieldUntil || _liveDefenders(id, o) > 0)) continue;
+            if (o != address(0)) _unstation(id);
+            _setOwner(id, h, msg.sender);
+            taken[n++] = id;
+        }
+        assembly ("memory-safe") {
+            mstore(taken, n)
+        }
+
+        uint256 cost = n * _prices.loopPerHex;
+        if (msg.value < cost) revert WrongPayment();
+        _toPool(cost);
+        if (msg.value > cost) {
+            (bool ok,) = msg.sender.call{value: msg.value - cost}("");
+            if (!ok) revert TransferFailed();
+        }
+        emit LoopClosed(msg.sender, trail.length, inside.length, taken);
+    }
+
+    function _liveDefenders(uint64 hexId, address owner) internal view returns (uint256 live) {
+        uint256[] storage ds = _defenders[hexId];
+        if (ds.length == 0) return 0;
+        (address[] memory owners,) = game.kinPacked(ds);
+        for (uint256 i; i < ds.length; ++i) {
+            if (owners[i] == owner && stationedAt[ds[i]] == hexId) ++live;
+        }
+    }
+
+    function _unstation(uint64 hexId) internal {
+        uint256[] storage cur = _defenders[hexId];
+        for (uint256 i; i < cur.length; ++i) {
+            if (stationedAt[cur[i]] == hexId) delete stationedAt[cur[i]];
+        }
+        delete _defenders[hexId];
     }
 
     /// Battle stats of a packed Kin record; see BattleLib.fighter.
@@ -331,6 +428,51 @@ contract TerrakinTerritory is EIP712, Ownable {
     }
 
     // ----------------------------------------------------------------- admin
+
+    /// @notice One-off copy of hex ownership and defenders from the previous
+    /// territory contract. Locked for good by [closeMigration].
+    function migrate(uint64[] calldata ids, address[] calldata owners, uint256[][] calldata defenders)
+        external
+        onlyOwner
+    {
+        if (migrationClosed) revert BadAuction();
+        for (uint256 i; i < ids.length; ++i) {
+            Hex storage h = hexes[ids[i]];
+            if (h.owner != address(0)) continue;
+            _setOwner(ids[i], h, owners[i]);
+            h.shieldUntil = 0;
+            uint256[] storage cur = _defenders[ids[i]];
+            for (uint256 k; k < defenders[i].length; ++k) {
+                if (stationedAt[defenders[i][k]] != 0) continue;
+                stationedAt[defenders[i][k]] = ids[i];
+                cur.push(defenders[i][k]);
+            }
+            emit HexClaimed(ids[i], owners[i]);
+        }
+    }
+
+    function closeMigration() external onlyOwner {
+        migrationClosed = true;
+    }
+
+    function loopDigest(address player, uint64 startedAt, uint64[] calldata trail, uint64[] calldata inside, uint64 deadline)
+        external
+        view
+        returns (bytes32)
+    {
+        return _hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    LOOP_TYPEHASH,
+                    player,
+                    startedAt,
+                    keccak256(abi.encodePacked(trail)),
+                    keccak256(abi.encodePacked(inside)),
+                    deadline
+                )
+            )
+        );
+    }
 
     function setPrices(Prices calldata p) external onlyOwner {
         _prices = p;
