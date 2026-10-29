@@ -21,6 +21,7 @@ export const game = () => process.env.GAME_ADDRESS as `0x${string}`;
 export const territory = () => process.env.TERRITORY_ADDRESS as `0x${string}`;
 export const convergence = () => process.env.CONVERGENCE_ADDRESS as `0x${string}` | undefined;
 export const drops = () => process.env.DROPS_ADDRESS as `0x${string}` | undefined;
+export const strides = () => process.env.STRIDES_ADDRESS as `0x${string}` | undefined;
 export const operator = () => privateKeyToAccount(process.env.OPERATOR_KEY as `0x${string}`);
 export const publicClient = createPublicClient({ chain: monadTestnet, transport: http() });
 export const walletClient = () => createWalletClient({ chain: monadTestnet, transport: http(), account: operator() });
@@ -98,3 +99,14 @@ export const dropsAbi = parseAbi([
   'function sealedSpotOf(uint256 id) view returns (bytes)',
   'function info(uint256 id) view returns (address dropper, address forWho, uint64 hexId, uint64 expiresAt, bool done, uint256 kinId, uint256 mon, string riddle)',
 ]);
+
+/** EIP-712 shape of TerrakinStrides.Walk. */
+export const walkTypes = {
+  Walk: [
+    { name: 'player', type: 'address' },
+    { name: 'from', type: 'uint64' },
+    { name: 'to', type: 'uint64' },
+    { name: 'metres', type: 'uint32' },
+    { name: 'deadline', type: 'uint64' },
+  ],
+} as const;

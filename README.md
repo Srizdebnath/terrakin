@@ -4,7 +4,7 @@
 
 # Terrakin
 
-A location-based creature game on **Monad**. Walk the real world to bond with **Kin** at real places. You own each Kin as an NFT. You can claim the **hex** of map you stand in and take a cut of every catch inside it, defend it with on-chain auto-battles, bid on daily **Landmark** zones, fuse and duel Kin in **the Lab**, raid bosses with strangers, trade on a peer-to-peer market and post bounties. Walk a **loop** around a neighbourhood to take every hex inside it, gather a real crowd at a park for a **Convergence** Mythic that nobody can bond alone, and hide MON or Kin in **dead drops** that only someone standing on the exact spot can open. Every outcome settles on Monad testnet in about a second.
+A location-based creature game on **Monad**. Walk the real world to bond with **Kin** at real places. You own each Kin as an NFT. You can claim the **hex** of map you stand in and take a cut of every catch inside it, defend it with on-chain auto-battles, bid on daily **Landmark** zones, fuse and duel Kin in **the Lab**, raid bosses with strangers, trade on a peer-to-peer market and post bounties. Walk a **loop** around a neighbourhood to take every hex inside it, gather a real crowd at a park for a **Convergence** Mythic that nobody can bond alone, and hide MON or Kin in **dead drops** that only someone standing on the exact spot can open. Just walking pays too: every **500 m** walked with the app open earns MON. Every outcome settles on Monad testnet in about a second.
 
 Android app (Flutter) · Solidity contracts (Foundry) · serverless backend (Vercel) · passkey wallets (Privy).
 
@@ -16,13 +16,18 @@ Android app (Flutter) · Solidity contracts (Foundry) · serverless backend (Ver
 
 | | |
 |---|---|
-| **APK (most phones, 64-bit)** | [`releases/terrakin-1.1.0-arm64.apk`](releases/terrakin-1.1.0-arm64.apk) (28 MB) · also on the [Releases page](../../releases/latest) |
-| APK (older 32-bit phones) | [`releases/terrakin-1.1.0-armv7.apk`](releases/terrakin-1.1.0-armv7.apk) (26 MB) |
+| **APK (most phones, 64-bit)** | [`releases/terrakin-1.1.1-arm64.apk`](releases/terrakin-1.1.1-arm64.apk) (28 MB) · also on the [Releases page](../../releases/latest) |
+| APK (older 32-bit phones) | [`releases/terrakin-1.1.1-armv7.apk`](releases/terrakin-1.1.1-armv7.apk) (26 MB) |
 | Checksums | [`releases/SHA256SUMS.txt`](releases/SHA256SUMS.txt) · signer SHA-256 `62:D7:F3:B3:…:EA:1C:D1:86` |
 | Requirements | Android 9+ (API 28), arm64 phone, GPS, a screen lock (needed for passkeys) |
 | Network | Monad testnet (chain id `10143`). New players are funded automatically: 0.2 MON and 10 Seed Orbs |
 
 The repo is private, so the links work for collaborators while signed in to GitHub.
+
+**New in 1.1.1**
+
+- **Walk to earn.** Every 500 m walked with Terrakin open pays 0.01 MON, up to 10 km (0.2 MON) a day. A chip on the map counts up to the next 500 m. See [Walk rewards](#walk-rewards).
+- **GPS fixed: the dot follows you, and standing still no longer reads as driving.** Phones that report no trustworthy speed had their speed guessed from one-second GPS jumps, so ±30 m of indoor jitter read as 150 km/h and locked spawns ("moving too fast"). The same bug kept the filter in "standing" mode while you walked, so the dot barely moved. Speed now comes from the phone's Doppler reading or from 15 s of travel minus the fixes' error, and the filter detects walking by fixes landing ahead of the dot in one direction.
 
 **Install:** download the APK on the phone, allow "install unknown apps" for your browser or Files app, open the APK, then sign up with a passkey.
 
@@ -52,6 +57,7 @@ The repo is private, so the links work for collaborators while signed in to GitH
 | `TerrakinRaids` | [`0x4bf777687D518F0AeAd54F5bc73B6502F04727AD`](https://testnet.monadexplorer.com/address/0x4bf777687D518F0AeAd54F5bc73B6502F04727AD) | Landmark raid bosses (module) |
 | `TerrakinConvergence` | [`0x8a521d4c6BC649f0BCc9bc4dB585197a77795A8D`](https://testnet.monadexplorer.com/address/0x8a521d4c6BC649f0BCc9bc4dB585197a77795A8D) | Daily crowd-only Mythics at real parks (module) |
 | `TerrakinDrops` | [`0xF357fDbd1e4235bD1Af500B2fa47420238646534`](https://testnet.monadexplorer.com/address/0xF357fDbd1e4235bD1Af500B2fa47420238646534) | Dead drops: MON and Kin locked to a sealed spot |
+| `TerrakinStrides` | [`0xDf17C2a620fdb89D43F1f38700b8ce23B0f59616`](https://testnet.monadexplorer.com/address/0xDf17C2a620fdb89D43F1f38700b8ce23B0f59616) | Walk rewards: 0.01 MON per 500 m walked, up to 10 km a day |
 | Operator / voucher signer | [`0x87435f913da1B8364aB5Ef514Ee1A20736a4f42D`](https://testnet.monadexplorer.com/address/0x87435f913da1B8364aB5Ef514Ee1A20736a4f42D) | Signs vouchers, funds players, owns the contracts |
 
 ---
@@ -69,7 +75,7 @@ The repo is private, so the links work for collaborators while signed in to GitH
 9. [Seasons, leaderboards, crews](#8-seasons-leaderboards-crews) (32–34)
 10. [Market, bounties, raids](#9-market-bounties-raids) (35–38)
 11. [Economy](#10-economy) (39–41)
-12. [Adventures: loops, Convergence, dead drops](#11-adventures-loops-convergence-dead-drops) (42–46)
+12. [Adventures: loops, Convergence, dead drops, walk rewards](#11-adventures-loops-convergence-dead-drops-walk-rewards) (42–46b)
 13. [Built on Monad, portable to any EVM chain](#12-built-on-monad-portable-to-any-evm-chain) (47–53)
 14. [Repository layout and building](#repository-layout)
 15. [Tests](#tests) · [Design decisions](#design-decisions) · [Known limits](#known-limits)
@@ -97,6 +103,7 @@ The repo is private, so the links work for collaborators while signed in to GitH
 | **Loop Capture** | Walk a closed loop of 6+ hexes. Free hexes on and inside it become yours, rivals' undefended hexes inside flip. A rival taking a trail hex mid-walk cuts the loop | `TerrakinTerritory.claimLoop` |
 | **Convergence** | Once a day per zone, a Mythic at a real OpenStreetMap park for 20 minutes. Bonds only when 3+ players stand there within 5 minutes of each other; each gets one | `TerrakinConvergence.join` |
 | **Dead Drops** | Lock MON and/or a Kin at your exact spot with a riddle. Finders must stand within 25 m; the spot is sealed on-chain | `TerrakinDrops` |
+| **Walk rewards** | Every 500 m walked with the app open pays 0.01 MON, up to 10 km a day. Driving and GPS jumps don't count | `TerrakinStrides.claim` |
 | **Share cards** | 1080×1350 meme cards after big moments | Local render |
 | **Tone** | Normal or Unhinged (Gen Z and crypto slang) copy | Local |
 | **Sound** | Weather-aware music and 16 effects, all synthesised in code | Local |
@@ -240,6 +247,7 @@ flowchart LR
   I["GET /api/convergence"] --> I1["zone's park, species, opening time"]
   J["POST /api/convergence"] --> J1["within 40 m while open: sign Pass"]
   K["POST /api/drop"] --> K1["{lat,lng}: seal spot, sign Spot<br/>{dropId}: unseal, 25 m → sign Claim, else warm/cold"]
+  L["POST /api/walk"] --> L1["{lat,lng}: HMAC stamp every ~100 m<br/>{stamps}: add up paced stretches, sign Walk per 500 m"]
 ```
 
 **Diagram 6. Code shared bit for bit between Dart, TypeScript and Solidity**
@@ -816,12 +824,13 @@ xychart-beta
 | Crew founding | 0.02 | Orb pack | 0.01 |
 | Raid entry | 0.01 | Duel stake | from 0.005 |
 | Loop Capture | 0.002 per hex taken | Dead drop | from 0.001 (or a Kin) |
+| Walking | +0.01 per 500 m (up to 10 km a day) | | |
 
-All prices are adjustable on-chain (`setPrices`) without a redeploy.
+All prices are adjustable on-chain (`setPrices`) without a redeploy. Walk rewards are paid from their own pool in `TerrakinStrides` (seeded with 5 MON, topped up by sending MON to it), tuned with `setRules`.
 
 ---
 
-## 11. Adventures: loops, Convergence, dead drops
+## 11. Adventures: loops, Convergence, dead drops, walk rewards
 
 Three features that only work if your body is somewhere real. The backend proves where you are, and the contracts settle what happens. None of them can be done from a sofa without spoofing GPS.
 
@@ -921,6 +930,43 @@ sequenceDiagram
     B-->>F: "cold"
   end
 ```
+
+
+### Walk rewards
+
+Walking itself pays. With the app open, the backend stamps where you are every ~100 m. Once the stamps add up to 500 m, the app claims 0.01 MON on-chain, and keeps going towards the next 500 m. The cap is 20 steps (10 km, 0.2 MON) per player per UTC day.
+
+**Diagram 46b. Walk rewards, end to end**
+
+```mermaid
+sequenceDiagram
+  participant A as App
+  participant B as Backend /api/walk
+  participant S as TerrakinStrides
+  loop every ~100 m of filtered GPS (not while driving)
+    A->>B: { lat, lng }
+    B-->>A: stamp = HMAC(wallet, lat, lng, time)
+  end
+  Note over A: stamps add up to 500 m
+  A->>B: { stamps }
+  B->>B: verify HMACs, order, freshness (10 min)
+  B->>B: count stretches ≤ 400 m and ≤ 4.5 m/s (no buses, no GPS jumps)
+  B-->>A: signed Walk(from, to, metres) ending at the last whole 500 m
+  A->>S: claim(walk, sig)
+  S->>S: from ≥ walkedUntil (no stretch paid twice), daily cap
+  S-->>A: 0.01 MON per 500 m
+  Note over A: stamps after "to" carry over to the next 500 m
+```
+
+| Rule | Value | Where |
+|---|---|---|
+| Reward | 0.01 MON per full 500 m | `TerrakinStrides.rules` (owner can change) |
+| Daily cap | 20 steps = 10 km = 0.2 MON | same |
+| Stamp spacing | ~100 m of smoothed GPS | app (`chain/strides.dart`) |
+| Counted stretch | ≤ 400 m and ≤ 4.5 m/s between stamps | backend (`lib/walk.ts`) |
+| Replay | each walk must start at or after the last paid one ends | contract (`walkedUntil`) |
+
+Like everything location-based here, it trusts the phone's GPS. A spoofed walk at walking pace would still be paid, which is why the reward is small and capped per day.
 
 ---
 
@@ -1064,7 +1110,7 @@ app/                 Flutter app (Android)
   lib/screens/       every screen and sheet
   assets/            Kin art, fonts, synthesised audio
 backend/             Vercel serverless API (TypeScript, viem, Privy)
-  api/               config, fund, voucher, presence, raidpass, enroll, health
+  api/               config, fund, voucher, presence, raidpass, enroll, health, loop, convergence, drop, walk
   lib/               spawn + hexgrid ports, chain, season helpers
   public/.well-known assetlinks.json for passkeys
 contracts/           Foundry project
@@ -1123,9 +1169,10 @@ python art/tools/audio.py                          # needs numpy, scipy, ffmpeg
 | `TerrakinLab.t.sol` | 7 | fusion odds, re-rolls, packs, duels, stale duels, modules |
 | `TerrakinSocial.t.sol` | 5 | Mythic caps, seasons, leaderboard, crews end to end |
 | `TerrakinCommerce.t.sol` | 6 | market, stale listings, bounty matching, raids, loot |
+| `TerrakinStrides.t.sol` | 5 | per-500 m pay, no stretch paid twice, daily cap, forged/foreign/stale walks, empty pool |
 | `TerrakinAdventures.t.sol` | 7 | Convergence circles, stragglers, forged passes, drops, addressed drops, expiry, tampered spots |
-| `app/test` | 34 | hex grid, battle vectors, ABI (incl. loop, join and drop calldata vs `cast`), spawns, economy, trade rules, GPS filter |
-| `backend/test` | 9 | 550 spawn vectors, 540 hex vectors, loop flood-fill, gap filling, anti-driving, stamp forgery, sealed spots |
+| `app/test` | 36 | hex grid, battle vectors, ABI (incl. loop, join and drop calldata vs `cast`), spawns, economy, trade rules, GPS filter (incl. ±35 m indoor jitter never reading as driving, walking with poor fixes) |
+| `backend/test` | 11 | 550 spawn vectors, 540 hex vectors, loop flood-fill, gap filling, anti-driving, stamp forgery, sealed spots, walk measuring and carry-over |
 | `backend/scripts/e2e-anvil.ts` | end to end | backend-signed voucher + presence accepted on a local chain |
 
 ## Design decisions
@@ -1135,8 +1182,8 @@ python art/tools/audio.py                          # needs numpy, scipy, ffmpeg
 - **Module registry.** New features (Lab, raids, and later ones) are separate contracts that `Terrakin` authorises with `setModule`. Players' Kin and profiles never need a redeploy.
 - **No trigonometry on-chain.** Hex and zone ids are computed off-chain with identical integer maths and arrive signed.
 - **Escrow-free market.** A listed Kin stays usable (it can defend, duel and raid) until it sells.
-- **Proof of presence without a database.** Loop stamps are HMACs and drop spots are AES-sealed on-chain, both under keys derived from the operator key, so the backend stays stateless.
-- **Smoothed GPS.** A Kalman filter weighs each fix by its accuracy, drops impossible jumps and holds still when you're standing, so the dot doesn't drift and jitter doesn't count as walking.
+- **Proof of presence without a database.** Loop and walk stamps are HMACs and drop spots are AES-sealed on-chain, both under keys derived from the operator key, so the backend stays stateless.
+- **Smoothed GPS.** A Kalman filter weighs each fix by its accuracy and drops impossible jumps. It tells walking from standing by the average innovation as a vector: jitter scatters fixes on every side of the dot and cancels out, walking keeps them on one side. Speed (for the driving lock) is the phone's Doppler speed when trusted, otherwise distance over 15 s minus the fixes' error, never a single 1 s jump.
 - **Sound is ours.** Every note and effect is synthesised by `art/tools/audio.py`. No samples, no licences.
 
 ## Known limits
@@ -1147,5 +1194,5 @@ python art/tools/audio.py                          # needs numpy, scipy, ffmpeg
 - **Hex grid seams** every 1° of longitude (about 100 km) cut the hexes on that line in half.
 - **Convergence needs a mapped park.** Places come from OpenStreetMap via Nominatim. A zone with no named park in OSM gets no Convergence; add one on openstreetmap.org and it appears within a day.
 - **Convergence needs 3 phones.** It's built for a crowd, so solo testing ends at "waiting for the circle".
-- **Vercel Hobby allows 12 functions.** The backend uses 10, so related endpoints share a function.
+- **Vercel Hobby allows 12 functions.** The backend uses 11, so related endpoints share a function.
 - **APKs are published for arm64 and armv7.** x86_64 (emulators) builds from source.

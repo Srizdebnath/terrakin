@@ -79,6 +79,7 @@ class _WorldScreenState extends State<WorldScreen>
     territory.addListener(_onTerritory);
     social.addListener(_onTerritory);
     adventures.addListener(_onAdventures);
+    strides.addListener(_onStrides);
     adventures.restoreLoop().catchError((Object _) {});
     territory.start(() => location.position);
     social
@@ -120,6 +121,7 @@ class _WorldScreenState extends State<WorldScreen>
     territory.removeListener(_onTerritory);
     social.removeListener(_onTerritory);
     adventures.removeListener(_onAdventures);
+    strides.removeListener(_onStrides);
     _timer?.cancel();
     _ticker.dispose();
     super.dispose();
@@ -160,6 +162,18 @@ class _WorldScreenState extends State<WorldScreen>
     _adventuresAt = DateTime.now();
     adventures.refreshDrops(p).catchError((Object _) {});
     adventures.refreshConvergences(p).catchError((Object _) {});
+  }
+
+  void _onStrides() {
+    final r = strides.lastReward;
+    if (r != null) {
+      strides.lastReward = null;
+      sound.play(Sfx.coin);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('+${fmtMon(r.$1)} for walking ${fmtDistance(r.$2.toDouble())}')),
+      );
+    }
+    if (mounted) setState(() {});
   }
 
   void _onAdventures() {
@@ -796,6 +810,31 @@ class _WorldScreenState extends State<WorldScreen>
                   ),
                 ),
                 const SizedBox(width: 8),
+                if (strides.enabled && gps == null) ...[
+                  _chip(
+                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(strides.cappedToday
+                            ? 'You\'ve earned today\'s walking MON. More tomorrow.'
+                            : 'Every 500 m walked with Terrakin open earns '
+                                '${strides.perStep > BigInt.zero ? fmtMon(strides.perStep) : 'MON'}'
+                                '${strides.stepsPerDay > 0 ? ' (up to ${strides.stepsPerDay * 500 ~/ 1000} km a day)' : ''}.'),
+                      ),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.directions_walk_rounded, size: 16, color: TK.signal),
+                        const SizedBox(width: 4),
+                        Text(
+                          strides.cappedToday ? 'Done today' : '${strides.progressM.round()}/500 m',
+                          style: TK.body(11, bold: true),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
                 if (gps != null)
                   _chip(
                     Row(

@@ -118,6 +118,10 @@ class GameChain extends ChangeNotifier {
     '0xf9820cc1': 'Nothing to claim.',
     '0x1c2506c8': 'Your loop was cut: a rival took a hex on your trail while you walked.',
     '0x6954f21c': 'That loop doesn\'t work. Walk at least 6 hexes around something.',
+    '0xd70a0e30': 'That stretch of walking was already paid.',
+    '0x82e65044': 'Walk 500 m to earn MON.',
+    '0xbbcba066': 'You\'ve earned today\'s walking MON. More tomorrow.',
+    '0xb9c049a0': 'The walking reward pool is empty right now.',
     '0x1cdde67b': 'This Convergence isn\'t open right now.',
     '0x003b2682': 'You\'re already in this circle.',
     '0x9445b059': 'Check the drop: a riddle up to 140 characters, 1 h-30 days, and MON or a Kin inside.',
@@ -125,7 +129,7 @@ class GameChain extends ChangeNotifier {
   };
 
   late MonadRpc rpc;
-  String game = '', characters = '', territory = '', lab = '', crews = '', season = '', market = '', bounties = '', raids = '', convergence = '', drops = '', explorer = 'https://testnet.monadexplorer.com';
+  String game = '', characters = '', territory = '', lab = '', crews = '', season = '', market = '', bounties = '', raids = '', convergence = '', drops = '', strides = '', explorer = 'https://testnet.monadexplorer.com';
   bool configured = false;
 
   BigInt balance = BigInt.zero;
@@ -156,6 +160,7 @@ class GameChain extends ChangeNotifier {
     raids = c['raids'] as String? ?? '';
     convergence = c['convergence'] as String? ?? '';
     drops = c['drops'] as String? ?? '';
+    strides = c['strides'] as String? ?? '';
     explorer = c['explorer'] as String? ?? explorer;
     configured = game.isNotEmpty;
     final prefs = await SharedPreferences.getInstance();

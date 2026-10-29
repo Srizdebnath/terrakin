@@ -62,6 +62,14 @@ class BackendApi {
   static Future<Map<String, dynamic>> dropClaim(String token, double lat, double lng, BigInt id) =>
       _req('POST', '/api/drop', token: token, body: {'lat': lat, 'lng': lng, 'dropId': '$id'});
 
+  /// Walk rewards: a stamp for where the player is now (asked every ~100 m).
+  static Future<Map<String, dynamic>> walkStamp(String token, double lat, double lng) =>
+      _req('POST', '/api/walk', token: token, body: {'lat': lat, 'lng': lng});
+
+  /// Walk rewards: measures the walk and signs the span covering whole 500 m steps.
+  static Future<Map<String, dynamic>> claimWalk(String token, List<Map<String, dynamic>> stamps) =>
+      _req('POST', '/api/walk', token: token, body: {'stamps': stamps});
+
   static Future<Map<String, dynamic>> voucher(String token, Map<String, Object?> body) =>
       _req('POST', '/api/voucher', token: token, body: body);
 }

@@ -8,6 +8,7 @@ import 'chain/commerce.dart';
 import 'chain/game_chain.dart';
 import 'chain/lab.dart';
 import 'chain/social.dart';
+import 'chain/strides.dart';
 import 'chain/territory.dart';
 import 'core/avatars.dart';
 import 'core/conditions.dart';
@@ -35,6 +36,7 @@ final lab = LabService(chain, territory);
 final social = SocialService(chain);
 final commerce = CommerceService(chain, territory);
 final adventures = AdventureService(chain, territory);
+final strides = StrideRewards(chain);
 
 /// Spawns that fled this session; they disappear from the map.
 final fledSpawns = <String>{};
@@ -121,6 +123,7 @@ class StrideTracker {
     if (d < math.max(6, location.accuracy)) return;
     _last = p;
     if (d > 150 || location.tooFast) return;
+    strides.walked(p);
     profile.addWalk(d);
     final b = buddy;
     if (b != null) collection.addStride(b.uid, d * strideMultiplier(b));

@@ -59,4 +59,32 @@ void main() {
     }
     expect(f.position, isNotNull);
   });
+
+  test('standing with ±35 m jitter and no phone speed never reads as driving', () {
+    final f = GpsFilter();
+    final rng = math.Random(11);
+    var maxKmh = 0.0;
+    for (var i = 0; i < 300; i++) {
+      final raw = offset(home, (rng.nextDouble() - .5) * 70, (rng.nextDouble() - .5) * 70);
+      f.add(raw.latitude, raw.longitude, 36, t0.add(Duration(seconds: i)));
+      maxKmh = math.max(maxKmh, f.speedKmh);
+    }
+    expect(maxKmh, lessThan(10));
+  });
+
+  test('walking with 36 m fixes and no phone speed: the dot keeps up', () {
+    final f = GpsFilter();
+    final rng = math.Random(5);
+    for (var i = 0; i < 30; i++) {
+      final raw = offset(home, (rng.nextDouble() - .5) * 20, (rng.nextDouble() - .5) * 20);
+      f.add(raw.latitude, raw.longitude, 36, t0.add(Duration(seconds: i)));
+    }
+    for (var i = 0; i < 180; i++) {
+      final truth = offset(home, 1.3 * i, 0);
+      final raw = offset(truth, (rng.nextDouble() - .5) * 20, (rng.nextDouble() - .5) * 20);
+      f.add(raw.latitude, raw.longitude, 36, t0.add(Duration(seconds: 30 + i)));
+    }
+    expect(dist(offset(home, 1.3 * 179, 0), f.position!), lessThan(30));
+    expect(f.speedKmh, lessThan(25));
+  });
 }

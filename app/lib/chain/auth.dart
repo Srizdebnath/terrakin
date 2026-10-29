@@ -98,6 +98,7 @@ class AuthService extends ChangeNotifier {
     wallet = null;
     chain.forget();
     adventures.forget();
+    strides.forget();
     notifyListeners();
   }
 }

@@ -17,4 +17,5 @@ export default handler('GET', async () => ({
   raids: process.env.RAIDS_ADDRESS ?? null,
   convergence: process.env.CONVERGENCE_ADDRESS ?? null,
   drops: process.env.DROPS_ADDRESS ?? null,
+  strides: process.env.STRIDES_ADDRESS ?? null,
 }));
